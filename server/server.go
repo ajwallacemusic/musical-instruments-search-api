@@ -102,12 +102,6 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 		}
 	}
 
-	var responseBody Response
-
-	// if err := easyjson.UnmarshalFromReader(res.Body, &responseBody); err != nil {
-	// 	fmt.Printf("error unmarshalling with easy json - %v", err)
-	// }
-
 	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
 		log.Fatalf("Error parsing the response body: %s", err)
 	}
@@ -118,6 +112,8 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 		response["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"],
 		response["took"],
 	)
+
+	var responseBody Response
 
 	responseBody.Took = fmt.Sprintf("%vms", response["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
 	responseBody.Hits = fmt.Sprintf("%v", int(response["took"].(float64)))
@@ -141,32 +137,17 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 			category := Category{name.(string), strSubCat}
 			inst.Categories = append(inst.Categories, category)
 		}
-
 		inst.Make = instMake.(string)
 		inst.Model = model.(string)
 		inst.Genres = make([]string, len(genres))
 		for i, v := range genres {
 			inst.Genres[i] = fmt.Sprint(v)
 		}
-		//inst.Categories = categories.([]Category)
 		responseBody.Results = append(responseBody.Results, inst)
 		log.Printf(" * ID=%s, %s", hit.(map[string]interface{})["_id"], hit.(map[string]interface{})["_source"])
 	}
 
-	// if err := json.NewDecoder(res.Body).Decode(&responseBody); err != nil {
-	// 	log.Fatalf("Error parsing the response body2: %s", err)
-	// }
-
-	// jsonData, err := json.Marshal(responseBody)
-	// if err != nil {
-	// 	log.Fatalf("Error parsing response to display")
-	// }
 	w.WriteHeader(http.StatusOK)
-	// resByte, err := easyjson.Marshal(res.Body)
-	// if err != nil {
-	// 	fmt.Println("error marshalling response w easyjson")
-	// }
-
 	jsonBytes, err := json.Marshal(responseBody)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

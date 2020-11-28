@@ -47,11 +47,13 @@ func main() {
 	r := mux.NewRouter()
 
 	r.Handle("/query", elasticsearchHandler(es, server.QueryElasticsearch)).Methods("POST")
-	// r.HandleFunc("/upsert")
-	// r.HandleFunc("/deleteAllDocs")
-	// r.HandleFunc("/createIndex")
-	// r.HandleFunc("/deleteIndex")
-	// r.HandleFunc("/fullRefresh")
+	/*TODO other endpoints
+	r.HandleFunc("/upsert")
+	r.HandleFunc("/deleteAllDocs")
+	r.HandleFunc("/createIndex")
+	r.HandleFunc("/deleteIndex")
+	r.HandleFunc("/fullRefresh")
+	*/
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
