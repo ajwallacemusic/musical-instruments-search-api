@@ -88,9 +88,16 @@ func BuildQuery(s, f map[string]interface{}) io.Reader {
 	query := map[string]interface{}{
 		"query": &q,
 	}
+
+	esjson, err := json.Marshal(query)
+	fmt.Println("json es query: ", string(esjson))
+	if err != nil {
+		log.Printf("error marshalling es query to json: %v", err)
+	}
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		log.Fatalf("Error encoding query: %s", err)
 	}
+
 	return &buf
 }
 
@@ -173,14 +180,22 @@ func convertQueryBodyToESquery(qb QueryBody) (s, f map[string]interface{}) {
 					},
 				}
 				must = append(must.([]interface{}), catTerm)
-				subCategories := cat.SubCategories
-				subCatTerms := map[string]interface{}{
-					"terms": map[string]interface{}{
-						"categories.categoryName.keyword": subCategories,
-					},
+				if cat.SubCategories != nil {
+					subCategories := cat.SubCategories
+					subCatTerms := map[string]interface{}{
+						"terms": map[string]interface{}{
+							"categories.subCategories.keyword": subCategories,
+						},
+					}
+					must = append(must.([]interface{}), subCatTerms)
 				}
-				must = append(must.([]interface{}), subCatTerms)
+
 			}
+		}
+		filters = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": must,
+			},
 		}
 	}
 	return search, filters
@@ -197,10 +212,10 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 		w.Write([]byte(err.Error()))
 		return
 	}
-	fmt.Printf("actual query: %v", string(bytes))
-	fmt.Println("queryBody: ", queryBody)
+	fmt.Printf("query from http request: %v", string(bytes))
 	search, filters := convertQueryBodyToESquery(queryBody)
 	b := BuildQuery(search, filters)
+
 	var response map[string]interface{}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -210,7 +225,7 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 		es.Search.WithIndex("musical-instruments"),
 		es.Search.WithBody(b),
 		es.Search.WithTrackTotalHits(true),
-		es.Search.WithPretty(),
+		//es.Search.WithPretty(),
 	)
 
 	if err != nil {
@@ -245,8 +260,8 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 
 	var responseBody Response
 
-	responseBody.Took = fmt.Sprintf("%vms", response["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
-	responseBody.Hits = fmt.Sprintf("%v", int(response["took"].(float64)))
+	responseBody.Hits = fmt.Sprintf("%v", response["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
+	responseBody.Took = fmt.Sprintf("%vms", int(response["took"].(float64)))
 
 	for _, hit := range response["hits"].(map[string]interface{})["hits"].([]interface{}) {
 
