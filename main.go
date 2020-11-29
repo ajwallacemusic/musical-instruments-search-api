@@ -11,6 +11,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func elasticsearchHandler(es *elasticsearch.Client,
+	f func(es *elasticsearch.Client, w http.ResponseWriter, r *http.Request)) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(es, w, r) })
+}
+
 func main() {
 	//setup and initialize ES connection
 	var responseMap map[string]interface{}
@@ -56,9 +61,4 @@ func main() {
 	*/
 
 	log.Fatal(http.ListenAndServe(":8080", r))
-}
-
-func elasticsearchHandler(es *elasticsearch.Client,
-	f func(es *elasticsearch.Client, w http.ResponseWriter, r *http.Request)) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { f(es, w, r) })
 }

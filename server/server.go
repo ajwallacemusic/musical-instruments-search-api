@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -30,8 +31,8 @@ type Category struct {
 
 //QueryBody is the structure of the post body for the /query endpoint
 type QueryBody struct {
-	Search  string            `json:"search,omitempty"`
-	Filters MusicalInstrument `json:"filters,omitempty"`
+	Search  string             `json:"search,omitempty"`
+	Filters *MusicalInstrument `json:"filters,omitempty"`
 }
 
 //Response is the data structure for results from the /query enpoint
@@ -52,16 +53,40 @@ func StaticQuery() (q map[string]interface{}) {
 }
 
 //BuildQuery builds an ES query
-func BuildQuery(q map[string]interface{}) io.Reader {
+func BuildQuery(s, f map[string]interface{}) io.Reader {
+	var q map[string]interface{}
+	//combine search and filter queries into bool must
+	if s != nil && f != nil {
+		q = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []interface{}{
+					&s,
+					&f,
+				},
+			},
+		}
+	} else if s == nil {
+		q = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []interface{}{
+					&f,
+				},
+			},
+		}
+	} else if f == nil {
+		q = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []interface{}{
+					&s,
+				},
+			},
+		}
+	}
+
 	// Build the request body.
 	var buf bytes.Buffer
 	query := map[string]interface{}{
-		"query": q,
-
-		// 		"match": map[string]interface{}{
-		// 			"title": "test",
-		// 		},
-		//},
+		"query": &q,
 	}
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		log.Fatalf("Error encoding query: %s", err)
@@ -69,8 +94,113 @@ func BuildQuery(q map[string]interface{}) io.Reader {
 	return &buf
 }
 
+func convertQueryBodyToESquery(qb QueryBody) (s, f map[string]interface{}) {
+	//search
+	var search map[string]interface{}
+	if qb.Search != "" {
+		search = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"should": []interface{}{
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"make": qb.Search,
+						},
+					},
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"model": qb.Search,
+						},
+					},
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"genres": qb.Search,
+						},
+					},
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"categories.categoryName": qb.Search,
+						},
+					},
+					map[string]interface{}{
+						"match": map[string]interface{}{
+							"categories.subCategories": qb.Search,
+						},
+					},
+				},
+			},
+		}
+	}
+	//filters
+	var filters map[string]interface{}
+	if qb.Filters != nil {
+		filters = map[string]interface{}{
+			"bool": map[string]interface{}{
+				"must": []interface{}{},
+			},
+		}
+		must := filters["bool"].(map[string]interface{})["must"]
+
+		if qb.Filters.Make != "" {
+			instMake := map[string]interface{}{
+				"term": map[string]interface{}{
+					"make.keyword": qb.Filters.Make,
+				},
+			}
+			must = append(must.([]interface{}), instMake)
+		}
+		if qb.Filters.Model != "" {
+			instModel := map[string]interface{}{
+				"term": map[string]interface{}{
+					"make.keyword": qb.Filters.Model,
+				},
+			}
+			must = append(must.([]interface{}), instModel)
+		}
+		if qb.Filters.Genres != nil {
+			genres := map[string]interface{}{
+				"terms": map[string]interface{}{
+					"make.keyword": qb.Filters.Genres,
+				},
+			}
+			must = append(must.([]interface{}), genres)
+		}
+		if qb.Filters.Categories != nil {
+			for _, cat := range qb.Filters.Categories {
+				catName := cat.CategoryName
+				catTerm := map[string]interface{}{
+					"term": map[string]interface{}{
+						"categories.categoryName.keyword": catName,
+					},
+				}
+				must = append(must.([]interface{}), catTerm)
+				subCategories := cat.SubCategories
+				subCatTerms := map[string]interface{}{
+					"terms": map[string]interface{}{
+						"categories.categoryName.keyword": subCategories,
+					},
+				}
+				must = append(must.([]interface{}), subCatTerms)
+			}
+		}
+	}
+	return search, filters
+}
+
+//QueryElasticsearch takes a request body, converts it to an ES query, sends that search to ES, and writes the response
 func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http.Request) {
-	b := BuildQuery(StaticQuery())
+	bytes, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	var queryBody QueryBody
+	err = json.Unmarshal(bytes, &queryBody)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	fmt.Printf("actual query: %v", string(bytes))
+	fmt.Println("queryBody: ", queryBody)
+	search, filters := convertQueryBodyToESquery(queryBody)
+	b := BuildQuery(search, filters)
 	var response map[string]interface{}
 
 	w.Header().Set("Content-Type", "application/json")
