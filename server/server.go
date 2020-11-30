@@ -212,7 +212,6 @@ func QueryElasticsearch(es *elasticsearch.Client, w http.ResponseWriter, r *http
 		w.Write([]byte(err.Error()))
 		return
 	}
-	fmt.Printf("query from http request: %v", string(bytes))
 	search, filters := convertQueryBodyToESquery(queryBody)
 	b := BuildQuery(search, filters)
 
