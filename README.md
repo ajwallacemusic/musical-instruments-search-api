@@ -17,4 +17,11 @@ This creates 3 Elasticsearch nodes, a Kibana dashboard available at `localhost:5
 Upon startup, the init.sh script waits for Elasticsearch to become available before starting the server.
 
 ## Using the API
+As of now, when you startup, your Elasticsearch cluster is completely empty. Indexing ability from the server is coming soon. To load data to search you need to index some documents to `musical-instruments` index either through Kibana or curl.
+
+In Kibana, copy the musical-instruments-data.json file and paste it after:
+`
+POST _bulk
+`
+
 The main search endpoint is /query and it is a POST method that submits a JSON request body. To see the schema for the request body, check out the swagger doc (coming soon.)
