@@ -20,7 +20,15 @@ func main() {
 	//setup and initialize ES connection
 	var responseMap map[string]interface{}
 
-	es, err := elasticsearch.NewDefaultClient()
+	//for local docker (non docker-compose) ES instance use host.docker.internal
+	cfg := elasticsearch.Config{
+		Addresses: []string{
+			"http://localhost:9200",
+		},
+	}
+
+	es, err := elasticsearch.NewClient(cfg)
+
 	if err != nil {
 		log.Fatalf("Error creating the client: %s", err)
 	}
