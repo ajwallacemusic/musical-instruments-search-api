@@ -22,6 +22,7 @@ RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o bin/app -v ./main.go
 FROM alpine:3.12 as run
  
 COPY --from=build /source/bin/app /app
+COPY --from=build /source/swagger-ui /swagger-ui/
 COPY --from=build /source/init.sh /init.sh
  
 RUN chmod +x /init.sh

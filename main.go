@@ -67,9 +67,10 @@ func main() {
 	r.HandleFunc("/deleteIndex")
 	r.HandleFunc("/fullRefresh")
 	*/
+
 	//swagger
 	fs := http.FileServer(http.Dir("./swagger-ui/"))
-	r.PathPrefix("/swagger-ui/").Handler(http.StripPrefix("/swagger-ui/", fs))
+	r.PathPrefix("/api/docs/").Handler(http.StripPrefix("/api/docs/", fs))
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
