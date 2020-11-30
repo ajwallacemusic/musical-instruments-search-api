@@ -23,7 +23,7 @@ func main() {
 	//for local docker (non docker-compose) ES instance use host.docker.internal
 	cfg := elasticsearch.Config{
 		Addresses: []string{
-			"http://localhost:9200",
+			"http://es01:9200",
 		},
 	}
 

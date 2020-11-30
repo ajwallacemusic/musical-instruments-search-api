@@ -74,19 +74,18 @@ services:
     networks:
       - elastic
   api:
-    image: golang:1.14
     container_name: api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
     depends_on: 
       - "es01"
       - "kib01"
-    volumes:
-      - .:/go/src/musical-instruments-search-api
-    working_dir: /go/src/musical-instruments-search-api
     ports:
       - 8080:8080
     networks:
       - elastic
-    command: go run main.go
 
 volumes:
   data01:
