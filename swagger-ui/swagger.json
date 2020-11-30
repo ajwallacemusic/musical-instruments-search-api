@@ -1,0 +1,251 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "description": "This is a test project using Elasticsearch and Golang to create a RESTful search API for musical instruments",
+      "version": "1.0.0",
+      "title": "Musical Instruments Search API",
+      "contact": {
+        "email": "ajwallacemusic@gmail.com"
+      },
+      "license": {
+        "name": "Apache 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      }
+    },
+    "host": "tbd",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "query",
+        "description": "Send a query to Elasticsearch"
+      },
+      {
+        "name": "index",
+        "description": "processes for ES indexes"
+      },
+      {
+        "name": "documents",
+        "description": "processes for making changes to data"
+      }
+    ],
+    "schemes": [
+      "https",
+      "http"
+    ],
+    "paths": {
+      "/query": {
+        "post": {
+          "tags": [
+            "query"
+          ],
+          "summary": "send a query to Elasticsearch",
+          "description": "a post body containing json of search criteria is submitted to Elasticsearch and responds with matching documents",
+          "operationId": "queryElasticsearch",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "query to send",
+              "required": true,
+              "schema": {
+                "$ref": "#/definitions/Query"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "search results",
+              "schema": {
+                "$ref": "#/definitions/Response"
+              }
+            },
+            "405": {
+              "description": "Invalid input"
+            }
+          }
+        }
+      },
+      "/createindex": {
+        "post": {
+          "tags": [
+            "index"
+          ],
+          "summary": "create an Elasticsearch index",
+          "operationId": "createIndex",
+          "responses": {
+            "200": {
+              "description": "index created successfully"
+            },
+            "500": {
+              "description": "internal server error"
+            }
+          }
+        }
+      },
+      "/deleteindex": {
+        "post": {
+          "tags": [
+            "index"
+          ],
+          "summary": "create an Elasticsearch index",
+          "operationId": "deleteIndex",
+          "responses": {
+            "200": {
+              "description": "index deleted successfully"
+            },
+            "500": {
+              "description": "internal server error"
+            }
+          }
+        }
+      },
+      "/fullrefresh": {
+        "post": {
+          "tags": [
+            "index",
+            "documents"
+          ],
+          "summary": "fully refresh Elasticsearch index",
+          "description": "if index exists, delete, create new and upload all new documents",
+          "operationId": "fullRefresh",
+          "responses": {
+            "200": {
+              "description": "refresh started"
+            },
+            "500": {
+              "description": "internal server error"
+            }
+          }
+        }
+      },
+      "/upsert": {
+        "post": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "upsert one or more documents to Elasticsearch",
+          "operationId": "upsert",
+          "responses": {
+            "200": {
+              "description": "document(s) upserted"
+            },
+            "500": {
+              "description": "internal server error"
+            }
+          }
+        }
+      },
+      "/deletealldocs": {
+        "post": {
+          "tags": [
+            "documents"
+          ],
+          "summary": "delete all documents in an index",
+          "operationId": "deleteAllDocs",
+          "responses": {
+            "200": {
+              "description": "documents deleted"
+            },
+            "500": {
+              "description": "internal server error"
+            }
+          }
+        }
+      }
+    },
+    "definitions": {
+      "Query": {
+        "properties": {
+          "search": {
+            "type": "string"
+          },
+          "make": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string"
+                },
+                "subCategories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "MusicalInstrument": {
+        "type": "object",
+        "properties": {
+          "make": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "category": {
+                  "type": "string"
+                },
+                "subCategories": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "properties": {
+          "responseTime": {
+            "type": "string"
+          },
+          "hits": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/MusicalInstrument"
+            }
+          }
+        }
+      }
+    }
+  }
