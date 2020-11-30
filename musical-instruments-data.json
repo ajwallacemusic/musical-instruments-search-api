@@ -1,0 +1,4 @@
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Fender", "model": "Telecaster", "categories": [ { "categoryName": "guitars", "subCategories": [ "electric guitars" ] } ], "genres": [ "rock", "country", "pop" ] }
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Gibson", "model": "LG-2", "categories": [ { "categoryName": "guitars", "subCategories": ["acoustic guitars"] } ], "genres": ["rock", "country", "folk", "singer/songwriter"] }
