@@ -1,166 +1,349 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "description": "This is a test project using Elasticsearch and Golang to create a RESTful search API for musical instruments",
-      "version": "1.0.0",
-      "title": "Musical Instruments Search API",
-      "contact": {
-        "email": "ajwallacemusic@gmail.com"
-      },
-      "license": {
-        "name": "Apache 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-      }
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Musical Instruments Search API",
+    "description": "This is a test project using Elasticsearch and Golang to create a RESTful search API for musical instruments",
+    "contact": {
+      "email": "ajwallacemusic@gmail.com"
     },
-    "host": "tbd",
-    "basePath": "/",
-    "tags": [
-      {
-        "name": "query",
-        "description": "Send a query to Elasticsearch"
-      },
-      {
-        "name": "index",
-        "description": "processes for ES indexes"
-      },
-      {
-        "name": "documents",
-        "description": "processes for making changes to data"
-      }
-    ],
-    "schemes": [
-      "https",
-      "http"
-    ],
-    "paths": {
-      "/query": {
-        "post": {
-          "tags": [
-            "query"
-          ],
-          "summary": "send a query to Elasticsearch",
-          "description": "a post body containing json of search criteria is submitted to Elasticsearch and responds with matching documents",
-          "operationId": "queryElasticsearch",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "query to send",
-              "required": true,
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "query",
+      "description": "Send a query to Elasticsearch"
+    },
+    {
+      "name": "index",
+      "description": "processes for ES indexes"
+    },
+    {
+      "name": "documents",
+      "description": "processes for making changes to data"
+    }
+  ],
+  "paths": {
+    "/query": {
+      "post": {
+        "tags": [
+          "query"
+        ],
+        "summary": "send a query to Elasticsearch",
+        "description": "a post body containing json of search criteria is submitted to Elasticsearch and responds with matching documents",
+        "operationId": "queryElasticsearch",
+        "requestBody": {
+          "description": "query to send",
+          "content": {
+            "application/json": {
               "schema": {
-                "$ref": "#/definitions/Query"
+                "$ref": "#/components/schemas/Query"
+              },
+              "examples": {
+                "searchOnly": {
+                  "description": "a simple search",
+                  "value": {
+                    "search": "telecaster"
+                  }
+                },
+                "filterByMake": {
+                  "description": "filter documents by Make (brand) - case sensitive",
+                  "value": {
+                    "filters": {
+                      "make": "Fender"
+                    }
+                  }
+                },
+                "filterByModel": {
+                  "description": "filter documents by Model - case sensitive",
+                  "value": {
+                    "filters": {
+                      "model": "Telecaster"
+                    }
+                  }
+                },
+                "searchWithFilters": {
+                  "description": "you can send both a search term as well as filters object with one or more filters",
+                  "value": {
+                    "search": "telecaster",
+                    "filters": {
+                      "make": "Fender",
+                      "model": "Telecaster"
+                    }
+                  }
+                },
+                "filterByGenre": {
+                  "description": "filter documents by one or more genre",
+                  "value": {
+                    "filters": {
+                      "genres": [
+                        "rock",
+                        "country",
+                        "pop"
+                      ]
+                    }
+                  }
+                },
+                "filterByCategoryName": {
+                  "description": "instruments have an array of categories, you can filter for one or more categories by their categoryName",
+                  "value": {
+                    "filters": {
+                      "categories": [
+                        {
+                          "categoryName": "guitars"
+                        },
+                        {
+                          "categoryName": "strings"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "filterBySubCategories": {
+                  "description": "each category can have one or more subCagegory that you can filter on",
+                  "value": {
+                    "filters": {
+                      "categories": [
+                        {
+                          "subCategories": [
+                            "electric guitars",
+                            "single coil guitars"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "filterByCategoryNameAndSubCategory": {
+                  "description": "combine categoryName and subCategories filters",
+                  "value": {
+                    "filters": {
+                      "categories": [
+                        {
+                          "categoryName": "guitars",
+                          "subCategories": [
+                            "electric guitars",
+                            "single coil guitars"
+                          ]
+                        },
+                        {
+                          "categoryName": "strings",
+                          "subCategories": [
+                            "6 strings",
+                            "rock band"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "fullSearchAndFilters": {
+                  "description": "full query body with search term and filters",
+                  "value": {
+                    "search": "telecaster",
+                    "filters": {
+                      "make": "Fender",
+                      "model": "Telecaster",
+                      "genres": [
+                        "rock",
+                        "country",
+                        "pop"
+                      ],
+                      "categories": [
+                        {
+                          "categoryName": "guitars",
+                          "subCategories": [
+                            "electric guitars",
+                            "single coil guitars"
+                          ]
+                        },
+                        {
+                          "categoryName": "strings",
+                          "subCategories": [
+                            "6 strings",
+                            "rock band"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
               }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "search results",
-              "schema": {
-                "$ref": "#/definitions/Response"
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                },
+                "example": {
+                  "took": "5ms",
+                  "hits": "2",
+                  "results": [
+                    {
+                      "make": "Fender",
+                      "model": "Telecaster",
+                      "genres": [
+                        "rock",
+                        "country",
+                        "pop"
+                      ],
+                      "categories": [
+                        {
+                          "categoryName": "guitars",
+                          "subCategories": [
+                            "electric guitars",
+                            "single coil guitars"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "make": "Gibson",
+                      "model": "LG-2",
+                      "genres": [
+                        "rock",
+                        "country",
+                        "singer/songwriter"
+                      ],
+                      "categories": [
+                        {
+                          "categoryName": "guitars",
+                          "subCategories": [
+                            "acoustic guitars",
+                            "small body acoustic"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
               }
-            },
-            "405": {
-              "description": "Invalid input"
             }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
           }
-        }
-      },
-      "/createindex": {
-        "post": {
-          "tags": [
-            "index"
-          ],
-          "summary": "create an Elasticsearch index",
-          "operationId": "createIndex",
-          "responses": {
-            "200": {
-              "description": "index created successfully"
-            },
-            "500": {
-              "description": "internal server error"
-            }
-          }
-        }
-      },
-      "/deleteindex": {
-        "post": {
-          "tags": [
-            "index"
-          ],
-          "summary": "create an Elasticsearch index",
-          "operationId": "deleteIndex",
-          "responses": {
-            "200": {
-              "description": "index deleted successfully"
-            },
-            "500": {
-              "description": "internal server error"
-            }
-          }
-        }
-      },
-      "/fullrefresh": {
-        "post": {
-          "tags": [
-            "index",
-            "documents"
-          ],
-          "summary": "fully refresh Elasticsearch index",
-          "description": "if index exists, delete, create new and upload all new documents",
-          "operationId": "fullRefresh",
-          "responses": {
-            "200": {
-              "description": "refresh started"
-            },
-            "500": {
-              "description": "internal server error"
-            }
-          }
-        }
-      },
-      "/upsert": {
-        "post": {
-          "tags": [
-            "documents"
-          ],
-          "summary": "upsert one or more documents to Elasticsearch",
-          "operationId": "upsert",
-          "responses": {
-            "200": {
-              "description": "document(s) upserted"
-            },
-            "500": {
-              "description": "internal server error"
-            }
-          }
-        }
-      },
-      "/deletealldocs": {
-        "post": {
-          "tags": [
-            "documents"
-          ],
-          "summary": "delete all documents in an index",
-          "operationId": "deleteAllDocs",
-          "responses": {
-            "200": {
-              "description": "documents deleted"
-            },
-            "500": {
-              "description": "internal server error"
-            }
+        },
+        "x-codegen-request-body-name": "body"
+      }
+    },
+    "/createindex": {
+      "post": {
+        "tags": [
+          "index"
+        ],
+        "summary": "create an Elasticsearch index",
+        "operationId": "createIndex",
+        "responses": {
+          "200": {
+            "description": "index created successfully",
+            "content": {}
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {}
           }
         }
       }
     },
-    "definitions": {
+    "/deleteindex": {
+      "post": {
+        "tags": [
+          "index"
+        ],
+        "summary": "create an Elasticsearch index",
+        "operationId": "deleteIndex",
+        "responses": {
+          "200": {
+            "description": "index deleted successfully",
+            "content": {}
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/fullrefresh": {
+      "post": {
+        "tags": [
+          "index",
+          "documents"
+        ],
+        "summary": "fully refresh Elasticsearch index",
+        "description": "if index exists, delete, create new and upload all new documents",
+        "operationId": "fullRefresh",
+        "responses": {
+          "200": {
+            "description": "refresh started",
+            "content": {}
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/upsert": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "upsert one or more documents to Elasticsearch",
+        "operationId": "upsert",
+        "responses": {
+          "200": {
+            "description": "document(s) upserted",
+            "content": {}
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/deletealldocs": {
+      "post": {
+        "tags": [
+          "documents"
+        ],
+        "summary": "delete all documents in an index",
+        "operationId": "deleteAllDocs",
+        "responses": {
+          "200": {
+            "description": "documents deleted",
+            "content": {}
+          },
+          "500": {
+            "description": "internal server error",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
       "Query": {
+        "type": "object",
         "properties": {
           "search": {
             "type": "string"
@@ -233,7 +416,7 @@
       "Response": {
         "type": "object",
         "properties": {
-          "responseTime": {
+          "took": {
             "type": "string"
           },
           "hits": {
@@ -242,10 +425,11 @@
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/MusicalInstrument"
+              "$ref": "#/components/schemas/MusicalInstrument"
             }
           }
         }
       }
     }
   }
+}
