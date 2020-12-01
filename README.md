@@ -3,7 +3,7 @@
 
 
 ## Running the App
-To startup this app all you need to do is clone the project, cd into it and run `docker-compose up`. Give it a couple minutes for the ES cluster to get fully set up. The logs go by fast, but eventually you might be able to catch the api start up and print the Go Client version and ES Cluster version followed by a bunch of ~'s.
+To startup this app all you need to do is clone the project, cd into it and run `docker-compose up`. Give it a couple minutes for the ES cluster to get fully set up. The logs go by fast, but eventually you might be able to catch the api start up log, where it prints the Go Client version and ES Cluster version followed by a bunch of ~'s.
 ```
 es01     | {"type": "server", "timestamp": "2020-11-30T23:14:35,609Z", "level": "INFO", "component": "o.e.h.AbstractHttpServerTransport", "cluster.name": "es-docker-cluster", "node.name": "es01", "message": "publish_address {172.29.0.3:9200}, bound_addresses {0.0.0.0:9200}", "cluster.uuid": "hGx2oVxITt-aWrYzZCb0Fg", "node.id": "TQA1xi1yQ4eRAcGDAUUuZQ"  }
 es01     | {"type": "server", "timestamp": "2020-11-30T23:14:35,611Z", "level": "INFO", "component": "o.e.n.Node", "cluster.name": "es-docker-cluster", "node.name": "es01", "message": "started", "cluster.uuid": "hGx2oVxITt-aWrYzZCb0Fg", "node.id": "TQA1xi1yQ4eRAcGDAUUuZQ"  }
