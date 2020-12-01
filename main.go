@@ -41,6 +41,9 @@ func main() {
 
 	defer res.Body.Close()
 
+	//index sample data
+	server.IndexBulk(es)
+
 	// Check response status
 	if res.IsError() {
 		log.Fatalf("Error: %s", res.String())
