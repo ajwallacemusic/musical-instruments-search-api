@@ -16,18 +16,10 @@ This creates 3 Elasticsearch nodes, a Kibana dashboard available at `localhost:5
 
 Upon startup, the init.sh script waits for Elasticsearch to become available before starting the server.
 
-## Using the API
-As of now, when you startup, your Elasticsearch cluster is completely empty. Indexing ability from the server is coming soon. To load data to search you need to index some documents to `musical-instruments` index either through Kibana or curl.
+## Using The API
+As of now, when you startup, your Elasticsearch cluster has an index called `musical-instruments`. It has 2 documents, a Fender Telecaster and Gibson LG-2 populated. (more seed data coming soon, promise.) Feel free to play around with the api and search using the `/query` endpoint, or to add more docs using kibana. Examples for both below.
 
-To use Kibana, go to `localhost:5601`, find the hamburger menu in the upper left corner, scroll down and select "Dev Tools" under "Management". Copy the musical-instruments-data.json file and paste it after a POST call to the _bulk endpoint:
-```
-POST _bulk
-{ "index" : { "_index" : "musical-instruments"} }
-{ "make": "Fender", "model": "Telecaster", "categories": [ { "categoryName": "guitars", "subCategories": [ "electric guitars" ] } ], "genres": [ "rock", "country", "pop" ] }
-{ "index" : { "_index" : "musical-instruments"} }
-{ "make": "Gibson", "model": "LG-2", "categories": [ { "categoryName": "guitars", "subCategories": ["acoustic guitars"] } ], "genres": ["rock", "country", "folk", "singer/songwriter"] }
-```
-
+### Searching Using The Query Endpoint
 The main search endpoint is /query and it is a POST method that submits a JSON request body. To see the schema for the request body and examples, run the app and check out the swagger doc at `localhost:8080/api/docs/` (don't forget the trailing `"/"`!)
 
 But if you're in a hurry, try sending this in postman or similar client:
@@ -46,3 +38,14 @@ curl --location --request POST 'localhost:8080/query' \
     "search": "telecaster"
 }'
 ```
+
+### Adding More Data:
+Navigate to Kibana, go to `localhost:5601`, find the hamburger menu in the upper left corner, scroll down and select "Dev Tools" under "Management". Copy the musical-instruments-data.json file and paste it after a POST call to the _bulk endpoint:
+```
+POST _bulk
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Fender", "model": "Telecaster", "categories": [ { "categoryName": "guitars", "subCategories": [ "electric guitars" ] } ], "genres": [ "rock", "country", "pop" ] }
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Gibson", "model": "LG-2", "categories": [ { "categoryName": "guitars", "subCategories": ["acoustic guitars"] } ], "genres": ["rock", "country", "folk", "singer/songwriter"] }
+```
+Soon, you'll be able to use the api to upload data at the `/upsert` endpoint, as well as delete/create/reindex the index and do a full refresh of a data set.
