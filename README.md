@@ -19,9 +19,30 @@ Upon startup, the init.sh script waits for Elasticsearch to become available bef
 ## Using the API
 As of now, when you startup, your Elasticsearch cluster is completely empty. Indexing ability from the server is coming soon. To load data to search you need to index some documents to `musical-instruments` index either through Kibana or curl.
 
-In Kibana, copy the musical-instruments-data.json file and paste it after:
-`
+To use Kibana, go to `localhost:5601`, find the hamburger menu in the upper left corner, scroll down and select "Dev Tools" under "Management". Copy the musical-instruments-data.json file and paste it after a POST call to the _bulk endpoint:
+```
 POST _bulk
-`
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Fender", "model": "Telecaster", "categories": [ { "categoryName": "guitars", "subCategories": [ "electric guitars" ] } ], "genres": [ "rock", "country", "pop" ] }
+{ "index" : { "_index" : "musical-instruments"} }
+{ "make": "Gibson", "model": "LG-2", "categories": [ { "categoryName": "guitars", "subCategories": ["acoustic guitars"] } ], "genres": ["rock", "country", "folk", "singer/songwriter"] }
+```
 
-The main search endpoint is /query and it is a POST method that submits a JSON request body. To see the schema for the request body, check out the swagger doc at `localhost:8080/api/docs/` (don't forget the trailing `"/"`!)
+The main search endpoint is /query and it is a POST method that submits a JSON request body. To see the schema for the request body and examples, run the app and check out the swagger doc at `localhost:8080/api/docs/` (don't forget the trailing `"/"`!)
+
+But if you're in a hurry, try sending this in postman or similar client:
+```
+POST localhost:8080
+{
+    "search": "telecaster"
+}
+```
+
+Or same request but with curl:
+```
+curl --location --request POST 'localhost:8080/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "search": "telecaster"
+}'
+```
