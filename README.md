@@ -29,7 +29,7 @@ The search endpoint is /query and it accepts a POST method with a JSON request b
 
 But if you're in a hurry, try sending this in postman or similar client:
 ```
-POST localhost:8080
+POST localhost:8080/query
 {
     "search": "telecaster"
 }
